@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrepAI - Futuristic AI Interview Assistant</title>
+  <meta name="description" content="Master your next technical or behavioral interview with PrepAI, an interactive browser-side simulator powered by Gemini AI and voice recognition.">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">P</div>
+        <div class="logo-text">PrepAI</div>
+      </div>
+      
+      <nav style="flex: 1;">
+        <ul class="nav-links">
+          <li class="nav-item">
+            <a class="nav-link active" data-tab="dashboard">
+              <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-tab="setup">
+              <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              <span>Setup Interview</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-tab="history">
+              <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <span>History & Analytics</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-tab="settings">
+              <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="api-badge" id="api-status-badge-container">
+          <span id="api-status-text">Offline Mode</span>
+          <span class="badge-indicator" id="api-status-badge"></span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      
+      <!-- Top header bar -->
+      <header class="header">
+        <div class="header-title">
+          <h1 id="view-title">Dashboard</h1>
+          <p id="view-subtitle">Monitor your growth and start new interview drills</p>
+        </div>
+      </header>
+
+      <!-- 1. DASHBOARD VIEW -->
+      <section id="dashboard-view" class="tab-view active">
+        <!-- Overview Counters -->
+        <div class="grid-3">
+          <div class="glass-card stat-card">
+            <div class="stat-icon purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-total">0</span>
+              <span class="stat-label">Total Drills</span>
+            </div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-icon cyan">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-avg-score">0%</span>
+              <span class="stat-label">Average Score</span>
+            </div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-icon pink">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-top-cat">N/A</span>
+              <span class="stat-label">Top Category</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Skill Category Breakdown -->
+          <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem;">Performance by Track</h3>
+            <div id="dashboard-categories">
+              <!-- Rendered dynamically in app.js -->
+            </div>
+          </div>
+
+          <!-- Recent Sessions -->
+          <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem;">Recent Drills</h3>
+            <div class="history-list" id="recent-interviews">
+              <!-- Rendered dynamically in app.js -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. SETUP INTERVIEW VIEW -->
+      <section id="setup-view" class="tab-view">
+        <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
+          <h2 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">Configure Mock Interview</h2>
+          
+          <div class="setup-form">
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="interview-topic">Interview Category</label>
+                <select id="interview-topic" class="custom-select">
+                  <option value="Frontend">Frontend Development</option>
+                  <option value="Backend">Backend Development</option>
+                  <option value="System Design">System Design & Architecture</option>
+                  <option value="Data Structures & Algorithms">Data Structures & Algorithms</option>
+                  <option value="Behavioral">Behavioral (STAR Method)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="interview-difficulty">Target Level</label>
+                <select id="interview-difficulty" class="custom-select">
+                  <option value="Junior">Junior Engineer</option>
+                  <option value="Mid-Level">Mid-Level Engineer</option>
+                  <option value="Senior">Senior Engineer</option>
+                  <option value="Staff/Lead">Staff / Tech Lead</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="interview-count">Number of Questions</label>
+              <select id="interview-count" class="custom-select">
+                <option value="3">3 Questions (Speed Run)</option>
+                <option value="5" selected>5 Questions (Standard)</option>
+                <option value="10">10 Questions (Deep Dive)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="job-description">Custom Job Description / Resume Context <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Gemini AI Mode Only)</span></label>
+              <textarea id="job-description" class="custom-textarea" placeholder="Paste job descriptions, resume text, or specific concepts you want the AI to target during the session..."></textarea>
+            </div>
+
+            <div style="margin-top: 1rem;">
+              <button class="btn btn-primary" id="start-interview-btn" style="width: 100%; padding: 1rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:0.25rem;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Launch Interview Arena
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. INTERVIEW ARENA VIEW -->
+      <section id="interview-view" class="tab-view">
+        <div class="glass-card" style="max-width: 900px; margin: 0 auto;">
+          
+          <div class="arena-header">
+            <div class="progress-track">
+              <span id="progress-text" style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Question 1 of 5</span>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="interview-progress-bar"></div>
+              </div>
+            </div>
+            <div class="timer-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <span id="timer-display">00:00</span>
+            </div>
+          </div>
+
+          <!-- Question Content Card -->
+          <div class="question-card">
+            <div class="question-meta">
+              <span class="tag tag-purple" id="q-category-tag">Frontend</span>
+              <span class="tag tag-cyan" id="q-difficulty-tag">Senior</span>
+            </div>
+            <p class="question-text" id="q-text">Loading question...</p>
+            
+            <div class="speech-controls">
+              <button class="btn btn-secondary btn-icon" id="speak-btn" title="Read Question Aloud">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                Read Question
+              </button>
+            </div>
+          </div>
+
+          <!-- Answer submission area -->
+          <div class="answer-area" id="answer-area">
+            <div class="form-group">
+              <label for="answer-input" style="font-weight:600;">Your Response</label>
+              <textarea id="answer-input" class="custom-textarea" style="min-height: 180px;" placeholder="Structure your technical response here. Try to use key terminology and explain your design choices..."></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+              <div class="voice-input-container">
+                <button class="btn btn-secondary" id="mic-btn">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                  Answer with Voice
+                </button>
+                <div class="mic-wave-container" id="mic-wave">
+                  <span class="mic-bar"></span>
+                  <span class="mic-bar"></span>
+                  <span class="mic-bar"></span>
+                  <span class="mic-bar"></span>
+                  <span class="mic-bar"></span>
+                  <span class="mic-bar"></span>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:0.75rem;">
+                <button class="btn btn-danger" id="quit-interview-btn">Quit Drill</button>
+                <button class="btn btn-primary" id="submit-answer-btn">Submit Answer</button>
+                <button class="btn btn-primary" id="next-question-btn" style="display:none;">
+                  Next Question
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Evaluation Feedback Block -->
+          <div class="grade-panel" id="evaluation-card" style="display:none; margin-top:2.5rem; border-top: 1px solid var(--glass-border); padding-top:2rem;">
+            <h3 style="font-family: var(--font-display); font-size:1.5rem; color:var(--text-main);">AI Grading Analysis</h3>
+            
+            <div class="grade-summary">
+              <div class="score-circle" style="--score-value: 0; --score-color: var(--color-success)">
+                <div class="score-content">
+                  <span class="score-num">0</span>
+                  <span class="score-label">Score</span>
+                </div>
+              </div>
+              <div class="grade-details">
+                <h4 style="font-size:1.15rem; margin-bottom:0.25rem;">Evaluation Completed</h4>
+                <p class="text-muted" style="font-size:0.9rem;">Review the feedback strengths and weakness points to adapt your explanation.</p>
+              </div>
+            </div>
+
+            <div class="grade-box strengths">
+              <h4>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                Key Strengths
+              </h4>
+              <p id="eval-strengths" style="font-size:0.9rem; line-height:1.5; color:var(--text-muted);">Calculating feedback...</p>
+            </div>
+
+            <div class="grade-box weaknesses">
+              <h4>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                Suggested Improvements
+              </h4>
+              <p id="eval-weaknesses" style="font-size:0.9rem; line-height:1.5; color:var(--text-muted);">Calculating feedback...</p>
+            </div>
+
+            <div class="grade-box model-ans">
+              <h4>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                Reference Answer Guide
+              </h4>
+              <p id="eval-model" style="font-size:0.9rem; line-height:1.5; color:var(--text-muted); white-space:pre-wrap;">Calculating model answer...</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 4. HISTORY VIEW -->
+      <section id="history-view" class="tab-view">
+        <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
+          <h2 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">Completed Interview Sessions</h2>
+          <div class="history-list" id="full-history-list">
+            <!-- Dynamic elements loaded via app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. SETTINGS VIEW -->
+      <section id="settings-view" class="tab-view">
+        <div class="glass-card" style="max-width: 750px; margin: 0 auto;">
+          <h2 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">Configuration Panel</h2>
+
+          <div style="display:flex; flex-direction:column; gap:2rem;">
+            <!-- Gemini Toggle -->
+            <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.05);">
+              <div>
+                <h3 style="font-size:1.15rem; margin-bottom:0.25rem;">Gemini AI Integration</h3>
+                <p class="text-muted" style="font-size:0.85rem; max-width: 450px;">Toggle dynamic interview question generation and professional AI evaluations. Requires an API key.</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="api-mode-toggle">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- API Key Input -->
+            <div class="form-group">
+              <label for="settings-api-key">Google Gemini API Key</label>
+              <input type="password" id="settings-api-key" class="custom-input" placeholder="AI Studio API Key (AI_KEY_...)">
+              <p class="text-muted" style="font-size:0.75rem; margin-top:0.25rem;">Your key is stored securely in your browser's local sandbox (localStorage) and never uploaded to any remote server.</p>
+            </div>
+
+            <!-- Voice Synthesis Settings -->
+            <div style="padding-top:1rem; border-top:1px solid rgba(255,255,255,0.05);">
+              <h3 style="font-size:1.15rem; margin-bottom:1rem;">Voice Synthesis Preferences (TTS)</h3>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="voice-pitch">Pitch (0.5 - 2.0)</label>
+                  <input type="range" id="voice-pitch" min="0.5" max="2" step="0.1" value="1.0" style="accent-color:var(--color-primary);">
+                </div>
+                <div class="form-group">
+                  <label for="voice-rate">Rate / Speed (0.5 - 2.0)</label>
+                  <input type="range" id="voice-rate" min="0.5" max="2" step="0.1" value="1.0" style="accent-color:var(--color-primary);">
+                </div>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div style="padding-top:1.5rem; border-top: 1px solid rgba(239, 68, 68, 0.25);">
+              <h3 style="font-size:1.15rem; color:#fca5a5; margin-bottom:0.75rem;">Reset Actions</h3>
+              <div style="display:flex; gap:1rem;">
+                <button class="btn btn-danger" id="clear-history-btn">Clear All Histories</button>
+              </div>
+            </div>
+
+            <!-- Save settings action -->
+            <div style="padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: flex-end;">
+              <button class="btn btn-primary" id="save-settings-btn" style="min-width: 150px;">Save Settings</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Script Modules -->
+  <script src="questions.js"></script>
+  <script src="gemini.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
