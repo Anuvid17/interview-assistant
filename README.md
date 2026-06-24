@@ -57,6 +57,8 @@ interview-assistant/
 
 ---
 
+## Live Production link:- https://interview-assistant-green.vercel.app
+
 ## 🔑 Configure Gemini AI Mode
 
 1. Navigate to **Settings** in the sidebar.
