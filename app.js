@@ -316,10 +316,15 @@ function renderDashboard() {
 function calculateCategoryAverages() {
   const categories = {};
   state.history.forEach(session => {
+    if (!session || !Array.isArray(session.questions)) return;
+    
+    const evals = Array.isArray(session.evaluations) ? session.evaluations : [];
+    
     session.questions.forEach((q, idx) => {
-      const cat = q.category;
-      const evaluation = session.evaluations[idx];
-      if (evaluation) {
+      if (!q) return;
+      const cat = q.category || "General";
+      const evaluation = evals[idx];
+      if (evaluation && typeof evaluation.score === 'number') {
         if (!categories[cat]) {
           categories[cat] = { sum: 0, count: 0 };
         }
@@ -368,23 +373,26 @@ function viewHistoricalSession(index) {
   const session = state.history[index];
   if (!session) return;
 
+  const evals = Array.isArray(session.evaluations) ? session.evaluations : [];
+  const answers = Array.isArray(session.answers) ? session.answers : [];
+
   // Build a review content overlay
   const overlayHtml = `
     <div id="history-modal" class="glass-card" style="position: fixed; top: 10%; left: 10%; width: 80%; height: 80%; z-index: 1000; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,0.8); border-color: var(--color-primary-glow);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">
         <div>
-          <h2>Review: ${session.topic}</h2>
-          <p class="text-muted">${session.difficulty} • ${new Date(session.timestamp).toLocaleString()}</p>
+          <h2>Review: ${session.topic || "Practice Session"}</h2>
+          <p class="text-muted">${session.difficulty || "Mixed"} • ${new Date(session.timestamp).toLocaleString()}</p>
         </div>
         <div style="display: flex; align-items: center; gap: 1.5rem;">
-          <div style="font-size: 1.5rem; font-weight: 700; color: ${getScoreColor(session.averageScore)}">Avg Score: ${session.averageScore}%</div>
+          <div style="font-size: 1.5rem; font-weight: 700; color: ${getScoreColor(session.averageScore)}">Avg Score: ${session.averageScore || 0}%</div>
           <button class="btn btn-secondary" onclick="closeHistoryModal()">Close</button>
         </div>
       </div>
       <div>
-        ${session.questions.map((q, idx) => {
-          const evalRes = session.evaluations[idx];
-          const ans = session.answers[idx] || "No answer provided.";
+        ${(session.questions || []).map((q, idx) => {
+          const evalRes = evals[idx] || { score: 0, strengths: "No feedback was generated.", weaknesses: "No improvement items.", modelAnswer: q.modelAnswer || "No reference answer." };
+          const ans = answers[idx] || "No answer provided.";
           return `
             <div style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); border-radius: var(--border-radius-md);">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 1rem;">
@@ -666,13 +674,14 @@ function endInterview(save = true) {
   stopSpeaking();
 
   if (save && state.questions.length > 0) {
-    const scores = state.evaluations.map(e => e ? e.score : 0);
+    const evals = Array.isArray(state.evaluations) ? state.evaluations : [];
+    const scores = evals.map(e => e ? (Number(e.score) || 0) : 0);
     const avgScore = scores.length > 0 ? Math.round(scores.reduce((a,b)=>a+b, 0) / scores.length) : 0;
 
     const newSession = {
       timestamp: Date.now(),
-      topic: state.questions[0].category,
-      difficulty: state.questions[0].difficulty,
+      topic: state.questions[0]?.category || "General",
+      difficulty: state.questions[0]?.difficulty || "Mixed",
       questionsCount: state.questions.length,
       questions: state.questions,
       answers: state.answers,

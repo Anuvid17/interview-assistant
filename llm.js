@@ -152,6 +152,34 @@ Do not return any introductory comments or wrapper text. Return only the raw JSO
 }
 
 /**
+ * Normalizes keys case-insensitively and converts scores to numbers
+ */
+function normalizeEvaluation(evalObj) {
+  const result = {
+    score: 0,
+    strengths: "No feedback details provided.",
+    weaknesses: "No weakness details provided.",
+    modelAnswer: ""
+  };
+  
+  if (!evalObj || typeof evalObj !== 'object') return result;
+
+  for (const key in evalObj) {
+    const lowerKey = key.toLowerCase();
+    if (lowerKey === 'score') {
+      result.score = Number(evalObj[key]) || 0;
+    } else if (lowerKey === 'strengths' || lowerKey === 'strength') {
+      result.strengths = String(evalObj[key]);
+    } else if (lowerKey === 'weaknesses' || lowerKey === 'weakness' || lowerKey === 'improvements' || lowerKey === 'improvement') {
+      result.weaknesses = String(evalObj[key]);
+    } else if (lowerKey === 'modelanswer' || lowerKey === 'model_answer' || lowerKey === 'idealanswer' || lowerKey === 'ideal_answer' || lowerKey === 'reference') {
+      result.modelAnswer = String(evalObj[key]);
+    }
+  }
+  return result;
+}
+
+/**
  * Evaluates the candidate's answer and compiles structured scoring and feedback
  */
 async function evaluateUserAnswer(question, modelAnswer, userAnswer) {
@@ -181,7 +209,8 @@ Return your evaluation as a single JSON object matching this schema:
 Do not return any conversational text. Return only the raw JSON.`;
 
   const rawText = await callLlmChatCompletions(prompt, true);
-  return extractAndParseJson(rawText);
+  const parsed = extractAndParseJson(rawText);
+  return normalizeEvaluation(parsed);
 }
 
 // Attach to window object for access in app.js
