@@ -87,7 +87,7 @@ function initSpeechRecognition() {
 // Load configurations from LocalStorage
 function loadSettings() {
   const provider = localStorage.getItem("prepai_provider") || "ollama";
-  const modelId = localStorage.getItem("prepai_model_id") || "llama3";
+  const modelId = localStorage.getItem("prepai_model_id") || "qwen3:8b";
   const apiUrl = localStorage.getItem("prepai_api_url") || "http://localhost:11434";
   const apiToken = localStorage.getItem("prepai_api_token") || "";
   const keyMode = localStorage.getItem("prepai_api_mode");

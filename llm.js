@@ -72,7 +72,7 @@ async function callLlmChatCompletions(prompt, forceJson = true) {
   if (provider === "ollama") {
     if (!baseUrl) baseUrl = "http://localhost:11434";
     fetchUrl = `${baseUrl.replace(/\/$/, '')}/v1/chat/completions`;
-    payload.model = modelId || "llama3";
+    payload.model = modelId || "qwen3:8b";
     if (forceJson) {
       payload.response_format = { type: "json_object" };
     }
