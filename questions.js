@@ -36,6 +36,24 @@ const interviewQuestions = [
     keywords: ["module federation", "webpack", "web components", "iframe", "shadow dom", "routing", "isolation", "state", "shared dependencies"],
     modelAnswer: "A robust micro-frontend architecture is best achieved using run-time integration via Webpack Module Federation or custom orchestrators (like single-spa). 1. Routing: Managed by a shell application using custom events or browser routing sync. 2. Styling Isolation: Enforced using Shadow DOM, CSS Modules, or CSS-in-JS to prevent collisions. 3. State Sharing: Minimized to keep micro-frontends decoupled. Shared data (like authentication) is shared via lightweight custom event buses, a global store client, or URL parameters. 4. Dependencies: Shared centrally in configuration to avoid loading multiple React/Vue instances."
   },
+  {
+    id: "fe-5",
+    category: "Frontend",
+    difficulty: "Senior",
+    question: "What are Core Web Vitals? Explain LCP, FID/INP, and CLS, and how you would improve them.",
+    hint: "Focus on loading performance, interactivity/responsiveness, and visual stability.",
+    keywords: ["lcp", "fid", "inp", "cls", "core web vitals", "performance", "interaction to next paint", "cumulative layout shift", "largest contentful paint"],
+    modelAnswer: "Core Web Vitals are key user-experience metrics defined by Google: 1. Largest Contentful Paint (LCP) measures loading speed (target under 2.5s). Improve by optimizing critical path CSS, using CDNs, caching, and preloading hero images. 2. Interaction to Next Paint (INP) / First Input Delay (FID) measures responsiveness (INP target under 200ms). Improve by breaking up long tasks, deferring unneeded JS, and optimizing event handlers. 3. Cumulative Layout Shift (CLS) measures visual stability (target under 0.1). Improve by specifying size attributes on images/media, reserving space for ads, and avoiding inserting content above existing content dynamically."
+  },
+  {
+    id: "fe-6",
+    category: "Frontend",
+    difficulty: "Mid-Level",
+    question: "Compare CSS Flexbox vs CSS Grid. When would you use one over the other, and how do they differ structurally?",
+    hint: "Think about one-dimensional vs two-dimensional layouts, content-first vs layout-first.",
+    keywords: ["flexbox", "grid", "1d", "2d", "axis", "rows", "columns", "layout-first", "content-first"],
+    modelAnswer: "CSS Flexbox is a 1D layout system (handles rows OR columns at a time), whereas CSS Grid is a 2D layout system (handles rows AND columns simultaneously). Flexbox is content-first: items size themselves and the container flows them. Grid is layout-first: you define columns/rows first and place items inside them. Use Flexbox for linear layouts (navigation bars, simple vertical lists). Use Grid for complex page configurations, cards matrices, or nested two-dimensional controls where alignment in both dimensions is critical."
+  },
 
   // --- BACKEND ---
   {
@@ -73,6 +91,23 @@ const interviewQuestions = [
     hint: "Think about Outbox Pattern, idempotency keys, Kafka offset management, and Sagas.",
     keywords: ["outbox pattern", "idempotency", "saga", "kafka", "mq", "eventual consistency", "exactly-once", "idempotent", "dead letter queue"],
     modelAnswer: "To maintain consistency and guarantee delivery: 1. Transactional Outbox Pattern: Save domain events in the database in the same transaction as state updates, then publish them using a CDC tool (like Debezium) to Kafka. 2. At-Least-Once Delivery: Achieved by acknowledging message offsets only after successful processing. 3. Exactly-Once Processing: Handled client-side via Idempotent Consumers using unique idempotency keys in database constraints. 4. Eventual Consistency: Orchestrated using the Saga Pattern (orchestrated or choreographed) with compensating transactions to roll back states if steps fail."
+  },
+  {
+    id: "be-5",
+    category: "Backend",
+    difficulty: "Mid-Level",
+    question: "What are different Redis caching strategies? Explain Cache-Aside, Write-Through, Write-Behind, and Cache Stampede.",
+    hint: "Compare read paths, write paths, database consistency, and high traffic query storms.",
+    keywords: ["cache-aside", "write-through", "write-behind", "cache stampede", "redis", "ttl", "mutex", "consistency"],
+    modelAnswer: "1. Cache-Aside (Lazy Loading): The application queries cache; on miss, it loads from DB and updates cache. Simple, but database updates can cause stale data. 2. Write-Through: The application writes to cache, which writes to DB. Ensures consistency but slower writes. 3. Write-Behind (Write-Back): Writes to cache, DB is updated asynchronously. High performance but risks data loss on cache failure. 4. Cache Stampede (Thundering Herd): Occurs when key expires under high traffic and multiple threads query DB at once. Mitigated using Mutex locks (XFetch) or early background recalculation before TTL expires."
+  },
+  {
+    id: "be-6",
+    category: "Senior",
+    question: "Compare OAuth2 authorization code flow with JWT stateless authentication. How do you handle JWT revocation?",
+    hint: "Think about state storage, token signatures, access tokens, refresh tokens, and blacklisting.",
+    keywords: ["oauth2", "jwt", "stateless", "revocation", "refresh token", "access token", "blacklist", "signature", "token"],
+    modelAnswer: "OAuth2 code flow is a delegative framework requiring authorization servers to exchange codes for tokens, often stateful. JWT is a self-contained token format signed by a server, enabling stateless verification without database lookups. JWT revocation is challenging due to statelessness. Solutions include: 1. Short expiry times (e.g., access token expires in 15 mins). 2. Stateful Refresh Tokens: Access token is stateless, but refresh tokens are tracked in Redis. To revoke access, delete the refresh token. 3. Blacklisting: Storing revoked, unexpired JTI (JWT ID) claims in a Redis blacklist with a TTL matching the token lifetime."
   },
 
   // --- SYSTEM DESIGN ---
@@ -112,6 +147,24 @@ const interviewQuestions = [
     keywords: ["crdt", "ot", "operational transformation", "websockets", "collaborative", "concurrency", "state synchronization", "yjs", "automerge"],
     modelAnswer: "Real-time collaborative editors require client-server state synchronization. 1. Operational Transformation (OT) is server-centric; clients emit operations (Insert/Delete) which are sent to a central server that transforms coordinates to resolve conflicts. It is complex to implement but keeps the client model small. 2. CRDTs are peer-to-peer ready, resolving conflicts deterministically without a central server by making operations commutative, associative, and idempotent. Modern applications use CRDTs (like Yjs or Automerge) because they handle offline edits and complex rich-text hierarchies more robustly, albeit with a larger memory footprint over time."
   },
+  {
+    id: "sd-5",
+    category: "System Design",
+    difficulty: "Senior",
+    question: "Explain database Sharding. What are vertical partitioning, horizontal partitioning, sharding keys, and re-sharding challenges?",
+    hint: "Think about splitting columns vs splitting rows, hash-based vs range-based sharding, and data migration.",
+    keywords: ["sharding", "horizontal", "vertical", "sharding key", "hash-based", "range-based", "re-sharding", "consistent hashing"],
+    modelAnswer: "Database sharding is horizontal partitioning: rows of a table are separated across different database servers. Vertical partitioning separates columns into different tables. A Sharding Key determines which shard a specific row is routed to. Range-based sharding maps ranges of keys (e.g., A-M to Shard 1), while Hash-based sharding uses hash functions (e.g., ID % N) to distribute rows evenly. Re-sharding challenges include moving millions of rows when adding new database shards. Consistent Hashing is used to minimize the amount of data moved during scaling."
+  },
+  {
+    id: "sd-6",
+    category: "System Design",
+    difficulty: "Mid-Level",
+    question: "Design a high-throughput message queue system. Discuss the difference between Point-to-Point and Publish-Subscribe patterns.",
+    hint: "Think about queues, topics, consumer groups, message logs, and fan-out configurations.",
+    keywords: ["message queue", "publish-subscribe", "point-to-point", "consumer group", "topic", "fan-out", "kafka", "rabbitmq"],
+    modelAnswer: "1. Point-to-Point (Queue): Messages are sent to a single queue. Each message is processed by exactly one consumer. Good for load distribution (e.g., worker processes). 2. Publish-Subscribe (Pub/Sub): Messages are published to a Topic. Multiple subscribers receive the same message (Fan-Out). Modern distributed log systems (like Kafka) use consumer groups: a topic is split into partitions, allowing a group of consumers to scale processing while ensuring message order within a partition, combining both queueing and pub/sub benefits."
+  },
 
   // --- DATA STRUCTURES & ALGORITHMS ---
   {
@@ -140,6 +193,24 @@ const interviewQuestions = [
     hint: "Mention overlapping subproblems, optimal substructure, recursion vs iteration, and space/time tradeoffs.",
     keywords: ["dynamic programming", "memoization", "tabulation", "top-down", "bottom-up", "overlapping subproblems", "optimal substructure", "fibonacci", "recursion"],
     modelAnswer: "Dynamic Programming (DP) solves complex problems by breaking them down into overlapping subproblems with optimal substructures, solving each once and saving results. Memoization (Top-down) starts with the main problem and recursively solves subproblems, storing results in a map/cache (lazy evaluation). Tabulation (Bottom-up) builds an iterative table from base cases up to the main problem (eager evaluation). For Fibonacci, Memoization recursively calls F(n) checking cache, while Tabulation loops from 2 to N, updating an array or two variables."
+  },
+  {
+    id: "dsa-4",
+    category: "Data Structures & Algorithms",
+    difficulty: "Mid-Level",
+    question: "Explain the Sliding Window algorithm technique. In what situations is it useful? Give an example.",
+    hint: "Think about arrays, contiguous subarrays, strings, O(N) linear time complexity vs O(N^2) nested loops.",
+    keywords: ["sliding window", "contiguous", "subarray", "substring", "pointer", "linear time", "o(n)", "window"],
+    modelAnswer: "The Sliding Window technique is used to perform operations on a contiguous sequence of elements (like subarrays or substrings) in O(N) linear time, avoiding nested loops. It maintains two pointers (left and right) representing the window bounds. When the condition is met, the right pointer expands; when violated, the left pointer contracts to shrink the window. It is useful for problems like 'Find the longest substring without repeating characters' or 'Maximum sum subarray of size K'."
+  },
+  {
+    id: "dsa-5",
+    category: "Data Structures & Algorithms",
+    difficulty: "Senior",
+    question: "How do you detect cycles in a directed graph and an undirected graph? Discuss algorithm choices.",
+    hint: "Consider DFS recursion stacks, Union-Find (Disjoint Set), and Kahns topological sort algorithm.",
+    keywords: ["cycle detection", "directed", "undirected", "dfs", "union-find", "disjoint set", "kahn", "topological sort", "back-edge"],
+    modelAnswer: "1. Undirected Graph: Detected using DFS (checking if a visited neighbor is not the parent) or Union-Find (if adding an edge connects two elements already in the same subset, a cycle exists). 2. Directed Graph: DFS back-edge detection (using recursion states: unvisited, visiting, visited). If DFS visits a node marked as 'visiting', a back-edge exists. Alternatively, Kahn's Topological Sort Algorithm (BFS): if the sorted output has fewer nodes than the total graph, a cycle exists because nodes with in-degrees > 0 remain unprocessed."
   },
 
   // --- BEHAVIORAL ---
@@ -173,11 +244,20 @@ const interviewQuestions = [
   {
     id: "beh-4",
     category: "Behavioral",
+    difficulty: "Senior",
+    question: "How do you balance managing technical debt with meeting aggressive product feature deadlines?",
+    hint: "Discuss debt categorization, tracking debt in backlog, negotiation with product manager, and allocating buffer time.",
+    keywords: ["star method", "technical debt", "deadline", "backlog", "refactor", "negotiation", "metrics", "buffer"],
+    modelAnswer: "I manage technical debt by categorizing and logging it like features. (Situation) In my last team, adding new payment methods grew code complexity, slowing release cycles. (Task) I needed to clear technical debt while keeping velocity. (Action) I created a debt backlog, calculated the 'interest' (wasted developer hours), and presented it to product management. I negotiated allocating 20% of every sprint buffer specifically to refactoring modules. (Result) We restructured the payment gateway into modules, lowering future task scopes and maintaining features on schedule."
+  },
+  {
+    id: "beh-5",
+    category: "Behavioral",
     difficulty: "Staff/Lead",
-    question: "Describe a situation where you had to make a critical architectural decision under tight deadlines with incomplete information. How did you proceed?",
-    hint: "Emphasize risk mitigation, fallback strategies, gathering crucial stakeholders, and documentation of decisions (ADRs).",
-    keywords: ["star method", "architecture", "adr", "trade-off", "risk mitigation", "fallback", "decision", "deadline"],
-    modelAnswer: "We had two weeks to integrate a real-time payment notification system. We didn't know the exact peak load patterns of our new client. (Situation) I had to choose between a fully serverless handler or extending our existing backend service. (Task) To mitigate risk, I gathered my leads, listed trade-offs, and chose the serverless route due to auto-scaling, but kept database writes decoupled via a message queue (SQS). (Action) I wrote a rapid ADR, implemented the system with strict monitoring, and established an alert fallback. (Result) The integration handled a 5x spike on launch day safely. The SQS queue allowed us to process messages at our own pace without overloading our main database."
+    question: "Describe a situation where a major system failure occurred in production. How did you lead the mitigation and prevent recurrence?",
+    hint: "Focus on triage communication, finding root cause (5 Whys), writing blameless post-mortems, and runbooks.",
+    keywords: ["star method", "outage", "post-mortem", "root-cause", "triage", "communication", "blameless", "runbook"],
+    modelAnswer: "During a Friday peak, our database connection pool exhausted, causing a complete API outage. (Situation) As lead, I stepped in to triage. (Task) I set up a bridge call, assigned one engineer to check DB resource monitors and another to scale HTTP servers back to lower traffic. We discovered a missing timeout in an external HTTP call. (Action) We force-killed connection pools, deployed a hotfix with request timeouts and circuit breakers, and restored API service within 35 minutes. Later, I led a blameless post-mortem, wrote a runbook, and added automated circuit breaker tests. (Result) The system has since maintained 99.99% uptime."
   }
 ];
 

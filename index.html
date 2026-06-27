@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PrepAI - Futuristic AI Interview Assistant</title>
-  <meta name="description" content="Master your next technical or behavioral interview with PrepAI, an interactive browser-side simulator powered by Gemini AI and voice recognition.">
+  <meta name="description" content="Master your next technical or behavioral interview with PrepAI, an interactive browser-side simulator powered by Open Source LLMs (like Ollama and Llama 3) and voice recognition.">
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -128,6 +128,7 @@
               <div class="form-group">
                 <label for="interview-topic">Interview Category</label>
                 <select id="interview-topic" class="custom-select">
+                  <option value="All" selected>All Domains / Mixed</option>
                   <option value="Frontend">Frontend Development</option>
                   <option value="Backend">Backend Development</option>
                   <option value="System Design">System Design & Architecture</option>
@@ -157,8 +158,8 @@
             </div>
 
             <div class="form-group">
-              <label for="job-description">Custom Job Description / Resume Context <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Gemini AI Mode Only)</span></label>
-              <textarea id="job-description" class="custom-textarea" placeholder="Paste job descriptions, resume text, or specific concepts you want the AI to target during the session..."></textarea>
+              <label for="job-description">Custom Focus / Context Prompt <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Offline filters or AI Mode)</span></label>
+              <textarea id="job-description" class="custom-textarea" placeholder="Paste job descriptions, specialized concepts (e.g. 'React Hooks', 'Redis caching'), or specific interview guidelines..."></textarea>
             </div>
 
             <div style="margin-top: 1rem;">
@@ -299,11 +300,11 @@
           <h2 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">Configuration Panel</h2>
 
           <div style="display:flex; flex-direction:column; gap:2rem;">
-            <!-- Gemini Toggle -->
+            <!-- Open Source AI Toggle -->
             <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.05);">
               <div>
-                <h3 style="font-size:1.15rem; margin-bottom:0.25rem;">Gemini AI Integration</h3>
-                <p class="text-muted" style="font-size:0.85rem; max-width: 450px;">Toggle dynamic interview question generation and professional AI evaluations. Requires an API key.</p>
+                <h3 style="font-size:1.15rem; margin-bottom:0.25rem;">Open Source AI Integration</h3>
+                <p class="text-muted" style="font-size:0.85rem; max-width: 450px;">Toggle dynamic interview question generation and professional AI evaluations using Open Source LLMs.</p>
               </div>
               <label class="toggle-switch">
                 <input type="checkbox" id="api-mode-toggle">
@@ -311,11 +312,31 @@
               </label>
             </div>
 
-            <!-- API Key Input -->
-            <div class="form-group">
-              <label for="settings-api-key">Google Gemini API Key</label>
-              <input type="password" id="settings-api-key" class="custom-input" placeholder="AI Studio API Key (AI_KEY_...)">
-              <p class="text-muted" style="font-size:0.75rem; margin-top:0.25rem;">Your key is stored securely in your browser's local sandbox (localStorage) and never uploaded to any remote server.</p>
+            <!-- LLM Settings Grid -->
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="settings-provider">AI Model Provider</label>
+                <select id="settings-provider" class="custom-select">
+                  <option value="ollama">Local Ollama (Offline & Private)</option>
+                  <option value="huggingface">Hugging Face Serverless API (Free Cloud)</option>
+                  <option value="custom">Custom OpenAI-Compatible (Groq, OpenRouter, etc.)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="settings-model-id">Model ID / Name</label>
+                <input type="text" id="settings-model-id" class="custom-input" placeholder="e.g. llama3, Qwen/Qwen2.5-72B-Instruct, llama3-8b-8192">
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="settings-api-url">Base API URL</label>
+                <input type="text" id="settings-api-url" class="custom-input" placeholder="e.g. http://localhost:11434">
+              </div>
+              <div class="form-group">
+                <label for="settings-api-token">API Token / Access Key</label>
+                <input type="password" id="settings-api-token" class="custom-input" placeholder="Token or key (if required)">
+              </div>
             </div>
 
             <!-- Voice Synthesis Settings -->
@@ -356,7 +377,7 @@
 
   <!-- Script Modules -->
   <script src="questions.js"></script>
-  <script src="gemini.js"></script>
+  <script src="llm.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

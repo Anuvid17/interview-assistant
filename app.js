@@ -86,14 +86,18 @@ function initSpeechRecognition() {
 
 // Load configurations from LocalStorage
 function loadSettings() {
-  const key = localStorage.getItem("prepai_gemini_api_key");
+  const provider = localStorage.getItem("prepai_provider") || "ollama";
+  const modelId = localStorage.getItem("prepai_model_id") || "llama3";
+  const apiUrl = localStorage.getItem("prepai_api_url") || "http://localhost:11434";
+  const apiToken = localStorage.getItem("prepai_api_token") || "";
   const keyMode = localStorage.getItem("prepai_api_mode");
   
-  if (key) {
-    document.getElementById("settings-api-key").value = key;
-  }
+  document.getElementById("settings-provider").value = provider;
+  document.getElementById("settings-model-id").value = modelId;
+  document.getElementById("settings-api-url").value = apiUrl;
+  document.getElementById("settings-api-token").value = apiToken;
   
-  if (keyMode === "true" && key) {
+  if (keyMode === "true") {
     state.apiKeyMode = true;
     document.getElementById("api-mode-toggle").checked = true;
     updateApiBadge(true);
@@ -106,16 +110,26 @@ function loadSettings() {
 
 // Save settings to LocalStorage
 function saveSettings() {
-  const key = document.getElementById("settings-api-key").value.trim();
+  const provider = document.getElementById("settings-provider").value;
+  const modelId = document.getElementById("settings-model-id").value.trim();
+  const apiUrl = document.getElementById("settings-api-url").value.trim();
+  const apiToken = document.getElementById("settings-api-token").value.trim();
   const keyModeChecked = document.getElementById("api-mode-toggle").checked;
 
-  if (key) {
-    localStorage.setItem("prepai_gemini_api_key", key);
-  } else {
-    localStorage.removeItem("prepai_gemini_api_key");
-  }
+  localStorage.setItem("prepai_provider", provider);
+  localStorage.setItem("prepai_model_id", modelId);
+  localStorage.setItem("prepai_api_url", apiUrl);
+  localStorage.setItem("prepai_api_token", apiToken);
 
-  if (keyModeChecked && key) {
+  if (keyModeChecked) {
+    if (provider !== "ollama" && !apiToken) {
+      document.getElementById("api-mode-toggle").checked = false;
+      localStorage.setItem("prepai_api_mode", "false");
+      state.apiKeyMode = false;
+      updateApiBadge(false);
+      showToast("Cannot enable AI Mode for " + provider + " without an API key/token.", "warning");
+      return;
+    }
     localStorage.setItem("prepai_api_mode", "true");
     state.apiKeyMode = true;
     updateApiBadge(true);
@@ -123,10 +137,6 @@ function saveSettings() {
     localStorage.setItem("prepai_api_mode", "false");
     state.apiKeyMode = false;
     updateApiBadge(false);
-    if (keyModeChecked && !key) {
-      document.getElementById("api-mode-toggle").checked = false;
-      showToast("Cannot enable AI Mode without an API key.", "warning");
-    }
   }
 
   showToast("Settings saved successfully.", "success");
@@ -137,9 +147,10 @@ function saveSettings() {
 function updateApiBadge(active) {
   const badge = document.getElementById("api-status-badge");
   const text = document.getElementById("api-status-text");
+  const provider = localStorage.getItem("prepai_provider") || "ollama";
   if (active) {
     badge.classList.add("active");
-    text.textContent = "Gemini AI Live";
+    text.textContent = provider === "ollama" ? "Ollama Active" : "AI Mode Active";
   } else {
     badge.classList.remove("active");
     text.textContent = "Offline Mode";
@@ -417,6 +428,60 @@ window.closeHistoryModal = function() {
   if (backdrop) backdrop.remove();
 };
 
+// Smart local related-questions ranker/filter
+function getRelatedOfflineQuestions(pool, promptText, count) {
+  if (!promptText || promptText.trim().length === 0) {
+    return selectRandomItems(pool, count);
+  }
+  
+  // Clean tokens from the search prompt
+  const keywords = promptText.toLowerCase().split(/[\s,.\-_/()]+/).filter(k => k.length > 2);
+  if (keywords.length === 0) {
+    return selectRandomItems(pool, count);
+  }
+
+  const scored = pool.map(q => {
+    let score = 0;
+    const searchString = `${q.question} ${q.hint} ${q.category} ${q.keywords ? q.keywords.join(' ') : ''} ${q.modelAnswer}`.toLowerCase();
+    
+    keywords.forEach(kw => {
+      if (searchString.includes(kw)) {
+        score += 10;
+        // Boost scores for matching specific metadata fields
+        if (q.category.toLowerCase().includes(kw)) score += 15;
+        if (q.question.toLowerCase().includes(kw)) score += 8;
+        if (q.keywords && q.keywords.some(k => k.toLowerCase() === kw)) score += 12;
+      }
+    });
+    
+    return { question: q, score: score };
+  });
+
+  // Sort descending by score
+  scored.sort((a, b) => b.score - a.score);
+
+  // Take elements that actually had matches first
+  const positiveMatches = scored.filter(item => item.score > 0);
+  let results = [];
+  
+  if (positiveMatches.length > 0) {
+    results = positiveMatches.slice(0, count).map(item => item.question);
+    
+    // Backfill if we matched fewer questions than requested
+    if (results.length < count) {
+      const matchedIds = results.map(r => r.id);
+      const remainder = pool.filter(q => !matchedIds.includes(q.id));
+      const backfill = selectRandomItems(remainder, count - results.length);
+      results = results.concat(backfill);
+    }
+  } else {
+    // If absolutely zero matches, just pick random questions from the pool
+    results = selectRandomItems(pool, count);
+  }
+  
+  return results;
+}
+
 // Start a fresh interview session
 async function startNewInterview() {
   const topic = document.getElementById("interview-topic").value;
@@ -437,34 +502,43 @@ async function startNewInterview() {
   startBtn.innerHTML = '<span class="spinner"></span> Loading Questions...';
 
   try {
-    if (state.apiKeyMode && window.prepaiGemini && window.prepaiGemini.hasGeminiKey()) {
-      // Dynamic AI question generation
-      const aiQuestions = await window.prepaiGemini.generateAIQuestions(topic, difficulty, count, jobDesc);
+    if (state.apiKeyMode && window.prepaiLlm && window.prepaiLlm.isLlmConfigured()) {
+      // Dynamic Open Source AI question generation
+      const aiQuestions = await window.prepaiLlm.generateAIQuestions(topic, difficulty, count, jobDesc);
       state.questions = aiQuestions;
-      showToast(`Generated ${aiQuestions.length} custom AI questions!`, "success");
+      showToast(`Generated ${aiQuestions.length} custom AI questions using Open Source LLM!`, "success");
     } else {
-      // Offline mode questions selection
-      if (jobDesc) {
-        showToast("Custom Job Description is only supported in Gemini AI Mode. Defaulting to preset questions.", "warning");
+      // Offline mode questions selection with keyword filters
+      let pool = [];
+      if (topic === "All") {
+        pool = window.interviewQuestions;
+      } else {
+        pool = window.interviewQuestions.filter(q => q.category === topic);
       }
-      
-      const filtered = window.interviewQuestions.filter(q => q.category === topic && q.difficulty === difficulty);
-      
+
+      // Filter by difficulty
+      let filtered = pool.filter(q => q.difficulty === difficulty);
       if (filtered.length === 0) {
-        // Fallback: relax difficulty, fetch any for this track
-        const relaxed = window.interviewQuestions.filter(q => q.category === topic);
-        if (relaxed.length === 0) {
-          throw new Error("No questions available for the selected category.");
-        }
-        state.questions = selectRandomItems(relaxed, count);
+        // Fallback: use whatever is in the pool
+        filtered = pool;
+      }
+
+      if (filtered.length === 0) {
+        throw new Error("No questions available for the selected configuration.");
+      }
+
+      // Apply smart prompt keyword filter if provided
+      if (jobDesc) {
+        state.questions = getRelatedOfflineQuestions(filtered, jobDesc, count);
+        showToast(`Matched related offline questions using prompt keywords!`, "success");
       } else {
         state.questions = selectRandomItems(filtered, count);
+        showToast(`Selected ${state.questions.length} offline practice questions!`, "success");
       }
-      showToast(`Selected ${state.questions.length} offline practice questions!`, "success");
     }
 
     if (state.questions.length === 0) {
-      throw new Error("Failed to populate questions. Try another topic or check API configuration.");
+      throw new Error("Failed to populate questions. Try another configuration or check local LLM settings.");
     }
 
     // Launch Arena
@@ -538,9 +612,9 @@ async function submitCurrentAnswer() {
   let evaluationResult = null;
 
   try {
-    if (state.apiKeyMode && window.prepaiGemini && window.prepaiGemini.hasGeminiKey()) {
-      // Dynamic Gemini Evaluation
-      evaluationResult = await window.prepaiGemini.evaluateUserAnswer(q.question, q.modelAnswer, userAnswer);
+    if (state.apiKeyMode && window.prepaiLlm && window.prepaiLlm.isLlmConfigured()) {
+      // Dynamic Open Source LLM Evaluation
+      evaluationResult = await window.prepaiLlm.evaluateUserAnswer(q.question, q.modelAnswer, userAnswer);
     } else {
       // Offline Simulated Evaluation
       evaluationResult = simulateOfflineEvaluation(q, userAnswer);
